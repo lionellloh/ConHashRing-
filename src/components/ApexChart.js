@@ -5,6 +5,8 @@ import axios from 'axios';
 //TODO: figure out how to separate component rendering from getting data (Container pattern?)
 
 const RING_SERVER_URL = "http://10.12.7.122:5001/get-ring";
+const COLOURS = ['#00C07C','#FEB019', '#008FFB', '#546E7A', '#E91E63', '#000080', '#81d8d0', '#ff4040'];
+const ALPHEBETS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 class ApexChart extends React.Component {
     constructor(props) {
@@ -12,17 +14,17 @@ class ApexChart extends React.Component {
 
         this.state = {
 
-            series: [100, 55, 13, 33, 5, 10, 50, 30],
+            series: [],
             options: {
                 fill: {
-                    colors: ['#00C07C','#FEB019', '#008FFB', '#546E7A', '#E91E63', '#000080', '#81d8d0', '#ff4040']
+                    colors: ['#546E7A', '#E91E63']
                 },
 
                 chart: {
                     width: 300,
                     type: 'donut',
                 },
-                labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team A'],
+                labels: ["Loading..."],
                 dataLabels: {
                     colors: ['#546E7A', '#E91E63'],
                     //Check if I can change what is shown here
@@ -59,14 +61,27 @@ class ApexChart extends React.Component {
     }
 
     componentDidMount(){
+        this.timer = setInterval(()=> this.getData(), 1000);
+    }
+
+    getData() {
         axios.get(RING_SERVER_URL).then(
             (res) => {
                 console.log(res.data);
                 var lengthArray = res.data.Segments.map((obj) => obj.Length);
-                console.log(lengthArray);
+                var labels = res.data.Segments.map((obj) => `Node ${obj.ID}`);
+                var colors = res.data.Segments.map((obj) => COLOURS[ALPHEBETS.indexOf(obj.ID[0])]);
+                console.log(colors);
 
                 this.setState({
-                        series :lengthArray
+                        series :lengthArray,
+                        options: {
+                            fill: {
+                                colors: colors
+                            },
+                            labels: labels
+                        }
+
                     }
 
 

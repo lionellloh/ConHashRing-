@@ -7,7 +7,7 @@ class App extends React.Component {
   render() {
 
     return (<div>
-      Hello from App.js
+      Ring Structure Visualisation
       <ApexChart/>
 
     </div>)
