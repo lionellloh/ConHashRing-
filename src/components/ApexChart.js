@@ -1,5 +1,10 @@
 import React from 'react'
 import ReactApexChart from 'react-apexcharts'
+import axios from 'axios';
+
+//TODO: figure out how to separate component rendering from getting data (Container pattern?)
+
+const RING_SERVER_URL = "http://10.12.7.122:5001/get-ring";
 
 class ApexChart extends React.Component {
     constructor(props) {
@@ -7,14 +12,21 @@ class ApexChart extends React.Component {
 
         this.state = {
 
-            series: [100, 55, 13, 33],
+            series: [100, 55, 13, 33, 5, 10, 50, 30],
             options: {
+                fill: {
+                    colors: ['#00C07C','#FEB019', '#008FFB', '#546E7A', '#E91E63', '#000080', '#81d8d0', '#ff4040']
+                },
+
                 chart: {
                     width: 300,
                     type: 'donut',
                 },
+                labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team A'],
                 dataLabels: {
-                    //TODO: set to false
+                    colors: ['#546E7A', '#E91E63'],
+                    //Check if I can change what is shown here
+                    //TODO: allow toggle to true
                     enabled: false
                 },
                 responsive: [{
@@ -24,7 +36,14 @@ class ApexChart extends React.Component {
                             width: 200
                         },
                         legend: {
-                            show: true
+                            show: true,
+                            labels: {
+                                colors: ['#546E7A', '#E91E63'],
+                                useSeriesColors: false
+                            },
+                            markers: {
+                                fillColors: ['#546E7A', '#E91E63']
+                            }
                         }
                     }
                 }],
@@ -39,6 +58,23 @@ class ApexChart extends React.Component {
         };
     }
 
+    componentDidMount(){
+        axios.get(RING_SERVER_URL).then(
+            (res) => {
+                console.log(res.data);
+                var lengthArray = res.data.Segments.map((obj) => obj.Length);
+                console.log(lengthArray);
+
+                this.setState({
+                        series :lengthArray
+                    }
+
+
+                )
+
+            }
+        )
+    }
 
     appendData() {
         var arr = this.state.series.slice()
@@ -82,7 +118,8 @@ class ApexChart extends React.Component {
             <div>
                 <div class="chart-wrap">
                     <div id="chart">
-                        <ReactApexChart options={this.state.options} series={this.state.series} type="donut" width={380} />
+                        <ReactApexChart options={this.state.options} series={this.state.series}
+                             type="donut" width={800} />
                     </div>
                 </div>
 
