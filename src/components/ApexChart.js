@@ -5,7 +5,8 @@ import axios from 'axios';
 //TODO: figure out how to separate component rendering from getting data (Container pattern?)
 
 const RING_SERVER_URL = "http://10.12.7.122:5001/get-ring";
-const COLOURS = ['#00C07C', '#FEB019', '#008FFB', '#546E7A', '#E91E63', '#000080', '#81d8d0', '#ff4040'];
+const COLOURS = ['#00C07C', '#FEB019', '#008FFB', '#546E7A', '#E91E63', '#000080', '#81d8d0',
+    '#ff4040', "#CE1126", "#808000", "#FFA07A", "#C0C0C0"];
 const ALPHEBETS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 class ApexChart extends React.Component {
