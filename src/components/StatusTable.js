@@ -1,68 +1,48 @@
 import React from 'react';
+import {Table, Tag} from 'antd';
+import axios from 'axios'
 
-import { Table } from 'antd';
-import * as ReactDOM from "react-dom";
+import {
+    CheckCircleOutlined,
+    SyncOutlined,
+    CloseCircleOutlined,
+} from '@ant-design/icons';
 
+
+const STETHO_SERVER_URL = "http://10.12.7.122:5000/get-status";
 const columns = [
     {
-        title: 'Name',
+        title: 'Node Name',
         dataIndex: 'name',
     },
     {
-        title: 'Chinese Score',
-        dataIndex: 'chinese',
+        title: 'Status',
+        dataIndex: 'status',
         sorter: {
-            compare: (a, b) => a.chinese - b.chinese,
-            multiple: 3,
+            compare: (a, b) => a - b
         },
-    },
-    {
-        title: 'Math Score',
-        dataIndex: 'math',
-        sorter: {
-            compare: (a, b) => a.math - b.math,
-            multiple: 2,
-        },
-    },
-    {
-        title: 'English Score',
-        dataIndex: 'english',
-        sorter: {
-            compare: (a, b) => a.english - b.english,
-            multiple: 1,
-        },
-    },
-];
+        render: (status) => {
+            let color;
+            let icon;
+            if (status === "Alive") {
+                color = 'green';
+                icon = <CheckCircleOutlined/>
+            }else if (status === "Temp Failure") {
+                color = "orange";
+                icon = <SyncOutlined spin />
+            } else {
+                color = "red";
+                icon = <CloseCircleOutlined/>
+            }
+            return (
+                <Tag icon = {icon} color={color} key={status}>
+                    { " "+status.toUpperCase()}
+                </Tag>
+            )
+        }
 
-const data = [
-    {
-        key: '1',
-        name: 'John Brown',
-        chinese: 98,
-        math: 60,
-        english: 70,
     },
-    {
-        key: '2',
-        name: 'Jim Green',
-        chinese: 98,
-        math: 66,
-        english: 89,
-    },
-    {
-        key: '3',
-        name: 'Joe Black',
-        chinese: 98,
-        math: 90,
-        english: 70,
-    },
-    {
-        key: '4',
-        name: 'Jim Red',
-        chinese: 88,
-        math: 99,
-        english: 89,
-    },
+
 ];
 
 function onChange(pagination, filters, sorter, extra) {
@@ -70,12 +50,55 @@ function onChange(pagination, filters, sorter, extra) {
 }
 
 export default class StatusTable extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            data: []
+        }
+    }
+
     render() {
         return (
             <div>
-                <Table columns={columns} dataSource={data} onChange={onChange} />
+                <Table columns={columns} dataSource={this.state.data} onChange={onChange}/>
             </div>
         )
+    }
+
+    componentDidMount() {
+        this.timer = setInterval(() => this.getData(), 1000);
+    }
+
+    getData() {
+
+        axios.get(STETHO_SERVER_URL).then((res) => {
+            console.log(res);
+            this.setState({
+                data: res.data.StatusArray.map(
+                    (node) => {
+                        return {
+                            key: node.name,
+                            name: node.name[0],
+                            status: this.mapStatus(parseInt(node.status, 10))
+                        }
+
+                    })
+            })
+        })
+
+    }
+
+    mapStatus(statusInt) {
+        if (statusInt === -1) {
+            var statusString = "Permanent Failure"
+        } else if (statusInt === 0) {
+            statusString = "Alive"
+        } else {
+            statusString = "Temp Failure"
+        }
+
+        return statusString
     }
 }
 
